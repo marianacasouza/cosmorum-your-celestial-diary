@@ -9,38 +9,142 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppMapaRouteImport } from './routes/app.mapa'
+import { Route as AppLeituraRouteImport } from './routes/app.leitura'
+import { Route as AppEuRouteImport } from './routes/app.eu'
+import { Route as AppDailyRouteImport } from './routes/app.daily'
+import { Route as AppChatRouteImport } from './routes/app.chat'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMapaRoute = AppMapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeituraRoute = AppLeituraRouteImport.update({
+  id: '/leitura',
+  path: '/leitura',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEuRoute = AppEuRouteImport.update({
+  id: '/eu',
+  path: '/eu',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDailyRoute = AppDailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +152,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/mapa': {
+      id: '/app/mapa'
+      path: '/mapa'
+      fullPath: '/app/mapa'
+      preLoaderRoute: typeof AppMapaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/leitura': {
+      id: '/app/leitura'
+      path: '/leitura'
+      fullPath: '/app/leitura'
+      preLoaderRoute: typeof AppLeituraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/eu': {
+      id: '/app/eu'
+      path: '/eu'
+      fullPath: '/app/eu'
+      preLoaderRoute: typeof AppEuRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/daily': {
+      id: '/app/daily'
+      path: '/daily'
+      fullPath: '/app/daily'
+      preLoaderRoute: typeof AppDailyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppChatRoute: typeof AppChatRoute
+  AppDailyRoute: typeof AppDailyRoute
+  AppEuRoute: typeof AppEuRoute
+  AppLeituraRoute: typeof AppLeituraRoute
+  AppMapaRoute: typeof AppMapaRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppChatRoute: AppChatRoute,
+  AppDailyRoute: AppDailyRoute,
+  AppEuRoute: AppEuRoute,
+  AppLeituraRoute: AppLeituraRoute,
+  AppMapaRoute: AppMapaRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

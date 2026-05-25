@@ -1,26 +1,74 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import sunFace from "@/assets/sun-face.jpg";
+import { StarField, Ornament } from "@/components/Celestial";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Welcome,
+  head: () => ({
+    meta: [
+      { title: "Cosmorum — seu universo, sua essência" },
+      { name: "description", content: "Comece sua jornada celestial com Cosmorum: mapa astral, leituras emocionais e cartas diárias do cosmos." },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Welcome() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="relative min-h-screen overflow-hidden bg-paper">
+      <StarField />
+      <div className="relative flex min-h-screen flex-col px-7 pt-16 pb-10">
+        <div className="text-center animate-fade-up">
+          <p className="tracking-mystic text-[10px] text-accent">★ COSMORUM ★</p>
+          <h1 className="mt-3 font-display text-5xl leading-none text-primary">
+            Cosmorum
+          </h1>
+          <p className="mt-2 font-serif italic text-[15px] text-muted-foreground">
+            seu universo, sua essência
+          </p>
+        </div>
+
+        <div className="relative mt-8 animate-float">
+          <div className="absolute inset-x-4 top-6 h-48 rounded-full bg-accent/15 blur-3xl" />
+          <img
+            src={sunFace}
+            alt="Sol celestial entre nuvens"
+            width={1024}
+            height={1024}
+            className="relative mx-auto w-full max-w-[340px] rounded-3xl shadow-mystic"
+          />
+        </div>
+
+        <div className="mt-8 text-center animate-fade-up">
+          <Ornament />
+          <h2 className="mt-5 font-display text-2xl leading-snug text-primary text-balance">
+            Um universo emocional
+            <br />
+            <em className="font-serif">esperando por você.</em>
+          </h2>
+          <p className="mx-auto mt-3 max-w-[300px] text-[13px] leading-relaxed text-muted-foreground">
+            Mapa astral profundo, leituras poéticas e cartas diárias do cosmos —
+            uma jornada íntima entre você e as estrelas.
+          </p>
+        </div>
+
+        <div className="mt-auto flex flex-col gap-3 pt-10">
+          <Link
+            to="/auth"
+            search={{ mode: "signup" }}
+            className="flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-sm tracking-[0.18em] text-primary-foreground shadow-mystic"
+          >
+            COMEÇAR MINHA JORNADA ✦
+          </Link>
+          <Link
+            to="/auth"
+            search={{ mode: "login" }}
+            className="text-center font-serif text-sm italic text-muted-foreground"
+          >
+            já tenho uma conta —{" "}
+            <span className="text-primary underline-offset-4 hover:underline">entrar</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
