@@ -39,7 +39,7 @@ function MapaPage() {
         </div>
       </header>
 
-      <div className="relative mx-6 mt-2 animate-float">
+      <div className="relative mx-6 mt-2">
         <img
           src={sunFace}
           alt="Sol celestial"
