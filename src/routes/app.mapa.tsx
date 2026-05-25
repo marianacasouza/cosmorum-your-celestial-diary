@@ -26,17 +26,17 @@ function MapaPage() {
   return (
     <div className="relative min-h-full overflow-hidden">
       <StarField />
-      <header className="relative flex items-start justify-between px-6 pt-8">
-        <div>
+      <header className="relative px-6 pt-8">
+        <button className="absolute right-5 top-8 rounded-full p-2 text-primary">
+          <Bell size={18} strokeWidth={1.5} />
+        </button>
+        <div className="text-center">
           <p className="tracking-mystic text-[10px] text-accent">★ COSMORUM ★</p>
           <h1 className="mt-1 font-display text-4xl leading-none text-primary">COSMORUM</h1>
           <p className="mt-1 font-serif italic text-[13px] text-muted-foreground">
             seu universo, sua essência
           </p>
         </div>
-        <button className="rounded-full p-2 text-primary">
-          <Bell size={18} strokeWidth={1.5} />
-        </button>
       </header>
 
       <div className="relative mx-6 mt-2 animate-float">
@@ -45,17 +45,21 @@ function MapaPage() {
           alt="Sol celestial"
           width={1024}
           height={1024}
-          className="mx-auto w-full max-w-[260px] opacity-85"
+          className="mx-auto w-full max-w-[240px] opacity-90"
           style={{ filter: "drop-shadow(0 12px 30px rgba(120, 40, 30, 0.18))" }}
         />
       </div>
 
-      <div className="relative mt-5 px-6">
-        <p className="text-center font-display text-lg italic leading-snug text-primary text-balance">
-          Para começar, preciso
-          <br /> de algumas informações
-          <br /> sobre você.
-        </p>
+      <div className="relative mt-2 px-6">
+        <div className="text-center">
+          <p className="font-serif text-[15px] italic text-primary/80">Bem-vinda ao</p>
+          <h2 className="mt-0.5 font-display text-4xl italic leading-none text-primary">
+            seu cosmos
+          </h2>
+          <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-muted-foreground">
+            Para começar, preciso de algumas informações sobre você.
+          </p>
+        </div>
 
         <div className="mt-5 flex flex-col gap-2.5">
           <InputCard icon={<User size={16} />} label="Nome completo">
