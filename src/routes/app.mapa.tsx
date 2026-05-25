@@ -39,18 +39,18 @@ function MapaPage() {
         </div>
       </header>
 
-      <div className="relative mx-6 mt-2">
+      <div className="relative mx-6 -mb-2">
         <img
           src={sunFace}
           alt="Sol celestial"
           width={1024}
           height={1024}
-          className="mx-auto w-full max-w-[240px] opacity-90"
+          className="mx-auto w-full max-w-[220px] opacity-90"
           style={{ filter: "drop-shadow(0 12px 30px rgba(120, 40, 30, 0.18))" }}
         />
       </div>
 
-      <div className="relative mt-2 px-6">
+      <div className="relative px-6">
         <div className="text-center">
           <p className="font-serif text-[15px] italic text-primary/80">Bem-vinda ao</p>
           <h2 className="mt-0.5 font-display text-4xl italic leading-none text-primary">
