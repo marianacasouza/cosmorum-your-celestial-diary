@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import sunFace from "@/assets/sun-face.jpg";
+import sunFace from "@/assets/sun-face.png";
 import { StarField, Ornament } from "@/components/Celestial";
 
 export const Route = createFileRoute("/")({
