@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import sunFace from "@/assets/sun-face.jpg";
+import sunFace from "@/assets/sun-face.png";
 import { StarField, Ornament } from "@/components/Celestial";
 
 export const Route = createFileRoute("/")({
@@ -27,14 +27,15 @@ function Welcome() {
           </p>
         </div>
 
-        <div className="relative mt-8 animate-float">
-          <div className="absolute inset-x-4 top-6 h-48 rounded-full bg-accent/15 blur-3xl" />
+        <div className="relative mt-6 animate-float">
+          <div className="absolute inset-x-4 top-10 h-48 rounded-full bg-accent/15 blur-3xl" />
           <img
             src={sunFace}
             alt="Sol celestial entre nuvens"
             width={1024}
             height={1024}
-            className="relative mx-auto w-full max-w-[340px] rounded-3xl shadow-mystic"
+            className="relative mx-auto w-full max-w-[320px] opacity-90"
+            style={{ filter: "drop-shadow(0 16px 40px rgba(120, 40, 30, 0.18))" }}
           />
         </div>
 
