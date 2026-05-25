@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown } from "lucide-react";
 import { StarField, Sparkle, Ornament } from "@/components/Celestial";
-import sunFace from "@/assets/sun-face.jpg";
+import sunFace from "@/assets/sun-face.png";
 import { NatalChart } from "@/components/NatalChart";
 
 export const Route = createFileRoute("/app/mapa")({
@@ -39,13 +39,14 @@ function MapaPage() {
         </button>
       </header>
 
-      <div className="relative mx-6 mt-4">
+      <div className="relative mx-6 mt-2 animate-float">
         <img
           src={sunFace}
           alt="Sol celestial"
           width={1024}
           height={1024}
-          className="mx-auto w-full max-w-[280px] rounded-2xl shadow-mystic"
+          className="mx-auto w-full max-w-[260px] opacity-85"
+          style={{ filter: "drop-shadow(0 12px 30px rgba(120, 40, 30, 0.18))" }}
         />
       </div>
 
