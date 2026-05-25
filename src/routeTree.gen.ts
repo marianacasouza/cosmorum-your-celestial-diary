@@ -12,6 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppMapaRouteImport } from './routes/app.mapa'
+import { Route as AppLeituraRouteImport } from './routes/app.leitura'
+import { Route as AppEuRouteImport } from './routes/app.eu'
+import { Route as AppDailyRouteImport } from './routes/app.daily'
+import { Route as AppChatRouteImport } from './routes/app.chat'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -28,34 +33,99 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMapaRoute = AppMapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeituraRoute = AppLeituraRouteImport.update({
+  id: '/leitura',
+  path: '/leitura',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEuRoute = AppEuRouteImport.update({
+  id: '/eu',
+  path: '/eu',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDailyRoute = AppDailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/daily': typeof AppDailyRoute
+  '/app/eu': typeof AppEuRoute
+  '/app/leitura': typeof AppLeituraRoute
+  '/app/mapa': typeof AppMapaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/auth'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/auth'
-  id: '__root__' | '/' | '/app' | '/auth'
+  to:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/daily'
+    | '/app/eu'
+    | '/app/leitura'
+    | '/app/mapa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
 }
 
@@ -82,12 +152,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/mapa': {
+      id: '/app/mapa'
+      path: '/mapa'
+      fullPath: '/app/mapa'
+      preLoaderRoute: typeof AppMapaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/leitura': {
+      id: '/app/leitura'
+      path: '/leitura'
+      fullPath: '/app/leitura'
+      preLoaderRoute: typeof AppLeituraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/eu': {
+      id: '/app/eu'
+      path: '/eu'
+      fullPath: '/app/eu'
+      preLoaderRoute: typeof AppEuRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/daily': {
+      id: '/app/daily'
+      path: '/daily'
+      fullPath: '/app/daily'
+      preLoaderRoute: typeof AppDailyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppChatRoute: typeof AppChatRoute
+  AppDailyRoute: typeof AppDailyRoute
+  AppEuRoute: typeof AppEuRoute
+  AppLeituraRoute: typeof AppLeituraRoute
+  AppMapaRoute: typeof AppMapaRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppChatRoute: AppChatRoute,
+  AppDailyRoute: AppDailyRoute,
+  AppEuRoute: AppEuRoute,
+  AppLeituraRoute: AppLeituraRoute,
+  AppMapaRoute: AppMapaRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
