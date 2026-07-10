@@ -102,9 +102,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="mx-auto min-h-screen w-full max-w-[480px] overflow-x-hidden">
-          <Outlet />
-        </div>
+        <LeituraProvider>
+          <div className="mx-auto min-h-screen w-full max-w-[480px] overflow-x-hidden">
+            <Outlet />
+          </div>
+        </LeituraProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
