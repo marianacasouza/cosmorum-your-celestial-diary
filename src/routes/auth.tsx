@@ -1,8 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { StarField, Ornament, Sparkle } from "@/components/Celestial";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import moonFace from "@/assets/moon-face.jpg";
+
 
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).catch("login"),
@@ -22,10 +25,53 @@ export const Route = createFileRoute("/auth")({
 function AuthScreen() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const isSignup = mode === "signup";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (user) navigate({ to: "/app/mapa" });
+  }, [user, navigate]);
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (isSignup) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/app/mapa`,
+            data: { full_name: name },
+          },
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Algo deu errado");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleOAuth = async (provider: "google" | "apple") => {
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/app/mapa` },
+    });
+    if (error) setError(error.message);
+  };
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-paper">
@@ -57,10 +103,18 @@ function AuthScreen() {
         </div>
 
         <div className="mt-7 flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm">
+          <button
+            type="button"
+            onClick={() => handleOAuth("google")}
+            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
+          >
             <GoogleIcon /> Continuar com Google
           </button>
-          <button className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm">
+          <button
+            type="button"
+            onClick={() => handleOAuth("apple")}
+            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
+          >
             <AppleIcon /> Continuar com Apple
           </button>
         </div>
@@ -71,13 +125,8 @@ function AuthScreen() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate({ to: "/app/mapa" });
-          }}
-          className="flex flex-col gap-3"
-        >
+        <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
+
           {isSignup && (
             <Field label="Nome">
               <input
@@ -113,13 +162,19 @@ function AuthScreen() {
             </button>
           )}
 
+          {error && (
+            <p className="text-center text-xs text-destructive">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm tracking-[0.18em] text-primary-foreground shadow-mystic"
+            disabled={busy}
+            className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm tracking-[0.18em] text-primary-foreground shadow-mystic disabled:opacity-60"
           >
-            {isSignup ? "CRIAR MINHA CONTA" : "ENTRAR"} <Sparkle className="h-3 w-3" />
+            {busy ? "…" : isSignup ? "CRIAR MINHA CONTA" : "ENTRAR"} <Sparkle className="h-3 w-3" />
           </button>
         </form>
+
 
         <Ornament className="my-5" />
 
