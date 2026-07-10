@@ -110,13 +110,6 @@ function AuthScreen() {
           >
             <GoogleIcon /> Continuar com Google
           </button>
-          <button
-            type="button"
-            onClick={() => handleOAuth("apple")}
-            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
-          >
-            <AppleIcon /> Continuar com Apple
-          </button>
         </div>
 
         <div className="my-5 flex items-center gap-3 text-[10px] tracking-[0.3em] text-muted-foreground">
