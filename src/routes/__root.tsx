@@ -98,9 +98,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[480px] overflow-x-hidden">
-        <Outlet />
-      </div>
+      <AuthProvider>
+        <div className="mx-auto min-h-screen w-full max-w-[480px] overflow-x-hidden">
+          <Outlet />
+        </div>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
+
