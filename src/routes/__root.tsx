@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
+import { LeituraProvider } from "@/hooks/use-leitura";
 
 
 function NotFoundComponent() {
