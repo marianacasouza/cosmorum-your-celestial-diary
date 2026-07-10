@@ -152,11 +152,19 @@ function MapaPage() {
         </div>
 
         <button
-          onClick={() => setGenerated(true)}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-sm tracking-[0.2em] text-primary-foreground shadow-mystic"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-sm tracking-[0.2em] text-primary-foreground shadow-mystic disabled:opacity-60"
         >
-          GERAR MEU MAPA <Sparkle className="h-3 w-3" />
+          {loading ? (
+            <>CONSULTANDO AS ESTRELAS <Loader2 className="h-3.5 w-3.5 animate-spin" /></>
+          ) : (
+            <>GERAR MEU MAPA <Sparkle className="h-3 w-3" /></>
+          )}
         </button>
+        {error && (
+          <p className="mt-3 text-center text-[11px] text-red-700">{error}</p>
+        )}
 
         <Ornament className="my-6" />
       </div>
