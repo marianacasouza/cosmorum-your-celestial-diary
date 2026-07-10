@@ -162,13 +162,19 @@ function AuthScreen() {
             </button>
           )}
 
+          {error && (
+            <p className="text-center text-xs text-destructive">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm tracking-[0.18em] text-primary-foreground shadow-mystic"
+            disabled={busy}
+            className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm tracking-[0.18em] text-primary-foreground shadow-mystic disabled:opacity-60"
           >
-            {isSignup ? "CRIAR MINHA CONTA" : "ENTRAR"} <Sparkle className="h-3 w-3" />
+            {busy ? "…" : isSignup ? "CRIAR MINHA CONTA" : "ENTRAR"} <Sparkle className="h-3 w-3" />
           </button>
         </form>
+
 
         <Ornament className="my-5" />
 
