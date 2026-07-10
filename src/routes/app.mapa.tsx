@@ -1,17 +1,74 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown } from "lucide-react";
+import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown, Loader2 } from "lucide-react";
 import { StarField, Sparkle, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.png";
 import { NatalChart } from "@/components/NatalChart";
+import { useLeitura } from "@/hooks/use-leitura";
 
 export const Route = createFileRoute("/app/mapa")({
   component: MapaPage,
 });
 
+function parseDate(d: string): string {
+  // "17 / 05 / 1993" -> "1993-05-17"
+  const parts = d.split(/[\s/\-]+/).filter(Boolean);
+  if (parts.length === 3) {
+    const [dd, mm, yyyy] = parts;
+    return `${yyyy.padStart(4, "0")}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+  return d;
+}
+
+function parseTime(t: string): string {
+  // "14 : 30" -> "14:30"
+  return t.replace(/\s+/g, "");
+}
+
 function MapaPage() {
+  const navigate = useNavigate();
+  const { setLeitura } = useLeitura();
   const [generated, setGenerated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
+    name: "Mariana Silva",
+    date: "17 / 05 / 1993",
+    time: "14 : 30",
+    city: "São Paulo, SP",
+    country: "Brasil",
+  });
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("https://roraimacunha.app.n8n.cloud/webhook/cosmorum-mapa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: form.name,
+          data_nascimento: parseDate(form.date),
+          hora_nascimento: parseTime(form.time),
+          cidade: form.city,
+          pais: form.country,
+          latitude: 0,
+          longitude: 0,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      const leitura = Array.isArray(data) ? data[0]?.leitura : data?.leitura;
+      if (leitura) setLeitura(leitura);
+      setGenerated(true);
+      navigate({ to: "/app/leitura" });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao gerar mapa");
+    } finally {
+      setLoading(false);
+    }
+  };
+
     name: "Mariana Silva",
     date: "17 / 05 / 1993",
     time: "14 : 30",
