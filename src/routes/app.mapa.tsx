@@ -69,12 +69,7 @@ function MapaPage() {
     }
   };
 
-    name: "Mariana Silva",
-    date: "17 / 05 / 1993",
-    time: "14 : 30",
-    city: "São Paulo, SP",
-    country: "Brasil",
-  });
+
 
   if (generated) {
     return <ChartView name={form.name} onBack={() => setGenerated(false)} />;
