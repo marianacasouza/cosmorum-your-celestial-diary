@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { StarField } from "@/components/Celestial";
 import statue from "@/assets/statue-reading.jpg";
+import { useLeitura } from "@/hooks/use-leitura";
 
 export const Route = createFileRoute("/app/leitura")({
   component: LeituraPage,
