@@ -103,10 +103,18 @@ function AuthScreen() {
         </div>
 
         <div className="mt-7 flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm">
+          <button
+            type="button"
+            onClick={() => handleOAuth("google")}
+            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
+          >
             <GoogleIcon /> Continuar com Google
           </button>
-          <button className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm">
+          <button
+            type="button"
+            onClick={() => handleOAuth("apple")}
+            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
+          >
             <AppleIcon /> Continuar com Apple
           </button>
         </div>
@@ -117,13 +125,8 @@ function AuthScreen() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate({ to: "/app/mapa" });
-          }}
-          className="flex flex-col gap-3"
-        >
+        <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
+
           {isSignup && (
             <Field label="Nome">
               <input
