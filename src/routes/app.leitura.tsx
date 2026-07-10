@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { StarField } from "@/components/Celestial";
 import statue from "@/assets/statue-reading.jpg";
+import { useLeitura } from "@/hooks/use-leitura";
 
 export const Route = createFileRoute("/app/leitura")({
   component: LeituraPage,
@@ -51,7 +52,12 @@ const READINGS: Record<(typeof TABS)[number], { title: string; subtitle: string;
 
 function LeituraPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("ESSÊNCIA");
-  const data = READINGS[tab];
+  const { leitura } = useLeitura();
+  const base = READINGS[tab];
+  const data =
+    tab === "ESSÊNCIA" && leitura
+      ? { ...base, body: leitura.split(/\n{2,}|\n/).map((s) => s.trim()).filter(Boolean) }
+      : base;
 
   return (
     <div className="relative min-h-full overflow-hidden">
