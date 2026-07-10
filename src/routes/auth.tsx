@@ -110,13 +110,6 @@ function AuthScreen() {
           >
             <GoogleIcon /> Continuar com Google
           </button>
-          <button
-            type="button"
-            onClick={() => handleOAuth("apple")}
-            className="flex items-center justify-center gap-3 rounded-full border border-border bg-card px-6 py-3 text-sm text-foreground shadow-sm"
-          >
-            <AppleIcon /> Continuar com Apple
-          </button>
         </div>
 
         <div className="my-5 flex items-center gap-3 text-[10px] tracking-[0.3em] text-muted-foreground">
@@ -213,10 +206,3 @@ function GoogleIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M16.4 12.7c0-2.8 2.3-4.1 2.4-4.2-1.3-1.9-3.3-2.2-4-2.2-1.7-.2-3.4 1-4.2 1-.9 0-2.2-1-3.7-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.4 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9s2.2.9 3.7.9c1.5 0 2.5-1.4 3.5-2.7 1.1-1.5 1.5-3 1.5-3.1-.1 0-2.9-1.1-2.9-4.4zM13.7 4.5c.8-.9 1.3-2.2 1.1-3.5-1.1 0-2.4.7-3.2 1.6-.7.8-1.4 2.1-1.2 3.4 1.3.1 2.5-.6 3.3-1.5z" />
-    </svg>
-  );
-}
