@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { StarField } from "@/components/Celestial";
 import statue from "@/assets/statue-reading.jpg";
 import { useLeitura } from "@/hooks/use-leitura";
