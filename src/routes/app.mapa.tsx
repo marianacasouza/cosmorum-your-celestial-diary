@@ -52,8 +52,6 @@ function MapaPage() {
           hora_nascimento: parseTime(form.time),
           cidade: form.city,
           pais: form.country,
-          latitude: 0,
-          longitude: 0,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
