@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { StarField } from "@/components/Celestial";
 import statue from "@/assets/statue-reading.jpg";
 import { useLeitura } from "@/hooks/use-leitura";
@@ -53,11 +54,8 @@ const READINGS: Record<(typeof TABS)[number], { title: string; subtitle: string;
 function LeituraPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("ESSÊNCIA");
   const { leitura } = useLeitura();
-  const base = READINGS[tab];
-  const data =
-    tab === "ESSÊNCIA" && leitura
-      ? { ...base, body: leitura.split(/\n{2,}|\n/).map((s) => s.trim()).filter(Boolean) }
-      : base;
+  const data = READINGS[tab];
+  const showLeitura = tab === "ESSÊNCIA" && leitura;
 
   return (
     <div className="relative min-h-full overflow-hidden">
@@ -102,9 +100,13 @@ function LeituraPage() {
           {data.subtitle}
         </h2>
         <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-foreground/85">
-          {data.body.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
+          {showLeitura ? (
+            <div className="prose prose-sm max-w-none prose-headings:font-display prose-headings:text-primary prose-headings:italic prose-p:text-foreground/85 prose-strong:text-primary prose-em:italic prose-a:text-accent">
+              <ReactMarkdown>{leitura}</ReactMarkdown>
+            </div>
+          ) : (
+            data.body.map((p, i) => <p key={i}>{p}</p>)
+          )}
         </div>
 
         <button className="mt-5 w-full rounded-full border border-border bg-card py-3 text-[11px] tracking-[0.25em] text-primary">
