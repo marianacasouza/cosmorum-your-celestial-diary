@@ -4,8 +4,17 @@ import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown, Loader2 } from
 import { StarField, Sparkle, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.png";
 import { NatalChart } from "@/components/NatalChart";
-import { useLeitura, type Signs } from "@/hooks/use-leitura";
+import { useLeitura, type ChartData } from "@/hooks/use-leitura";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  SIGN_SYMBOLS,
+  ROMAN,
+  computeAspects,
+  formatDeg,
+  houseOf,
+  normalizeSign,
+} from "@/lib/astro";
 
 export const Route = createFileRoute("/app/mapa")({
   component: MapaPage,
@@ -24,27 +33,16 @@ function parseTime(t: string): string {
   return t.replace(/\s+/g, "");
 }
 
-function extractSigns(data: unknown): Signs {
-  const d = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
-  if (!d || typeof d !== "object") return {};
-  const nested = (d.signos ?? d.signs ?? {}) as Record<string, unknown>;
-  const pick = (...keys: string[]) => {
-    for (const k of keys) {
-      const v = (d as Record<string, unknown>)[k] ?? nested[k];
-      if (typeof v === "string" && v.trim()) return v.trim();
-    }
-    return undefined;
-  };
-  return {
-    sol: pick("sol", "sun", "signo_solar", "sol_signo"),
-    lua: pick("lua", "moon", "signo_lunar", "lua_signo"),
-    asc: pick("asc", "ascendente", "ascendant", "rising", "signo_ascendente"),
-  };
-}
+type WebhookResponse = {
+  leitura?: string;
+  posicoes?: ChartData["posicoes"];
+  ascendente?: ChartData["ascendente"];
+  casas_whole_sign?: ChartData["casas_whole_sign"];
+};
 
 function MapaPage() {
   const { user } = useAuth();
-  const { setLeitura, profile, setProfile, setSigns, generated, setGenerated } = useLeitura();
+  const { setLeitura, profile, setProfile, setSigns, setChart, generated, setGenerated } = useLeitura();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(
@@ -73,12 +71,52 @@ function MapaPage() {
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json().catch(() => ({}));
-      const leitura = Array.isArray(data) ? data[0]?.leitura : data?.leitura;
-      if (leitura) setLeitura(leitura);
-      setSigns(extractSigns(data));
+      const raw = await res.json().catch(() => ({}));
+      const data: WebhookResponse = Array.isArray(raw) ? raw[0] ?? {} : raw ?? {};
+
+      if (data.leitura) setLeitura(data.leitura);
+
+      let chart: ChartData | null = null;
+      if (data.posicoes && data.ascendente && data.casas_whole_sign) {
+        chart = {
+          posicoes: data.posicoes,
+          ascendente: data.ascendente,
+          casas_whole_sign: data.casas_whole_sign,
+        };
+        setChart(chart);
+        setSigns({
+          sol: normalizeSign(data.posicoes["Sol"]?.signo ?? ""),
+          lua: normalizeSign(data.posicoes["Lua"]?.signo ?? ""),
+          asc: normalizeSign(data.ascendente.signo ?? ""),
+        });
+      }
+
       setProfile(form);
       setGenerated(true);
+
+      // Persist to Supabase (best-effort — requires birth_charts table)
+      if (user && chart) {
+        supabase
+          .from("birth_charts")
+          .insert({
+            user_id: user.id,
+            name: form.name,
+            birth_date: parseDate(form.date),
+            birth_time: parseTime(form.time),
+            city: form.city,
+            country: form.country,
+            sun_sign: normalizeSign(chart.posicoes["Sol"]?.signo ?? ""),
+            moon_sign: normalizeSign(chart.posicoes["Lua"]?.signo ?? ""),
+            asc_sign: normalizeSign(chart.ascendente.signo ?? ""),
+            posicoes: chart.posicoes,
+            ascendente: chart.ascendente,
+            casas_whole_sign: chart.casas_whole_sign,
+            leitura: data.leitura ?? null,
+          })
+          .then(({ error }) => {
+            if (error) console.warn("[birth_charts] insert failed:", error.message);
+          });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao gerar mapa");
     } finally {
@@ -89,6 +127,7 @@ function MapaPage() {
   if (generated) {
     return <ChartView name={form.name} onBack={() => setGenerated(false)} />;
   }
+
 
   return (
     <div className="relative min-h-full overflow-hidden">
@@ -215,33 +254,43 @@ function InputCard({
 }
 
 function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
+  const { chart } = useLeitura();
   const [tab, setTab] = useState<"posicoes" | "aspectos" | "casas">("aspectos");
 
-  const aspects = [
-    { a: "☉", n: "Sol", rel: "trígono", b: "Lua", bs: "☽", orb: "3°12'", sym: "△", color: "text-blue-700" },
-    { a: "☽", n: "Lua", rel: "oposição", b: "Marte", bs: "♂", orb: "5°47'", sym: "☍", color: "text-red-700" },
-    { a: "☿", n: "Mercúrio", rel: "trígono", b: "Júpiter", bs: "♃", orb: "2°21'", sym: "△", color: "text-blue-700" },
-    { a: "♀", n: "Vênus", rel: "quadratura", b: "Saturno", bs: "♄", orb: "4°01'", sym: "□", color: "text-red-700" },
-    { a: "♂", n: "Marte", rel: "sextil", b: "Urano", bs: "♅", orb: "1°39'", sym: "✶", color: "text-blue-700" },
-  ];
+  const ascSign = chart ? normalizeSign(chart.ascendente.signo) : "";
 
-  const positions = [
-    { p: "Sol", s: "Touro", deg: "26°14'", h: "Casa X" },
-    { p: "Lua", s: "Escorpião", deg: "08°02'", h: "Casa IV" },
-    { p: "Ascendente", s: "Leão", deg: "12°47'", h: "—" },
-    { p: "Mercúrio", s: "Gêmeos", deg: "03°55'", h: "Casa XI" },
-    { p: "Vênus", s: "Câncer", deg: "19°28'", h: "Casa XII" },
-    { p: "Marte", s: "Touro", deg: "14°06'", h: "Casa X" },
-    { p: "Júpiter", s: "Libra", deg: "22°41'", h: "Casa III" },
-    { p: "Saturno", s: "Aquário", deg: "27°33'", h: "Casa VII" },
-    { p: "Quíron", s: "Leão", deg: "05°18'", h: "Casa I" },
-  ];
+  const aspects = chart
+    ? computeAspects(chart).slice(0, 8).map((a) => ({
+        n: a.a, b: a.b, aSym: a.aSym, bSym: a.bSym,
+        rel: a.label, orb: a.orb, sym: a.sym, color: a.color,
+      }))
+    : [];
 
-  const houses = Array.from({ length: 12 }, (_, i) => ({
-    n: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][i],
-    s: ["Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes", "Áries", "Touro", "Gêmeos", "Câncer"][i],
-    deg: `${(i * 7 + 4) % 30}°${(i * 13) % 60 < 10 ? "0" : ""}${(i * 13) % 60}'`,
-  }));
+  const positions = chart
+    ? [
+        ...Object.entries(chart.posicoes).map(([planet, p]) => ({
+          p: planet,
+          s: normalizeSign(p.signo),
+          deg: formatDeg(p.grau),
+          h: `Casa ${ROMAN[houseOf(p.signo, ascSign) - 1] ?? "—"}`,
+        })),
+        {
+          p: "Ascendente",
+          s: ascSign,
+          deg: formatDeg(chart.ascendente.grau),
+          h: "—",
+        },
+      ]
+    : [];
+
+  const houses = chart
+    ? chart.casas_whole_sign.map((h) => ({
+        n: ROMAN[h.casa - 1] ?? String(h.casa),
+        s: normalizeSign(h.signo),
+        sym: SIGN_SYMBOLS[normalizeSign(h.signo)] ?? "",
+      }))
+    : [];
+
 
   return (
     <div className="relative min-h-full overflow-hidden">
@@ -283,10 +332,10 @@ function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
             <ul className="divide-y divide-border/60">
               {aspects.map((a) => (
                 <li key={a.n + a.b} className="flex items-center gap-3 py-2 text-[13px]">
-                  <span className="font-display text-lg text-primary">{a.a}</span>
+                  <span className="font-display text-lg text-primary">{a.aSym}</span>
                   <span className="flex-1 truncate">
                     {a.n} <em className="italic text-muted-foreground">{a.rel}</em> {a.b}{" "}
-                    <span className="font-display text-primary">{a.bs}</span>
+                    <span className="font-display text-primary">{a.bSym}</span>
                   </span>
                   <span className="text-[11px] text-muted-foreground">orb {a.orb}</span>
                   <span className={`font-display text-lg ${a.color}`}>{a.sym}</span>
@@ -323,7 +372,9 @@ function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
               {houses.map((h) => (
                 <li key={h.n} className="flex items-center justify-between rounded-lg bg-secondary/60 px-3 py-2 text-[12px]">
                   <span className="font-display text-base text-primary">{h.n}</span>
-                  <span className="font-serif italic text-muted-foreground">{h.s}</span>
+                  <span className="font-serif italic text-muted-foreground">
+                    {h.sym} {h.s}
+                  </span>
                 </li>
               ))}
             </ul>
