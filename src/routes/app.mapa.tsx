@@ -373,7 +373,9 @@ function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
               {houses.map((h) => (
                 <li key={h.n} className="flex items-center justify-between rounded-lg bg-secondary/60 px-3 py-2 text-[12px]">
                   <span className="font-display text-base text-primary">{h.n}</span>
-                  <span className="font-serif italic text-muted-foreground">{h.s}</span>
+                  <span className="font-serif italic text-muted-foreground">
+                    {h.sym} {h.s}
+                  </span>
                 </li>
               ))}
             </ul>
