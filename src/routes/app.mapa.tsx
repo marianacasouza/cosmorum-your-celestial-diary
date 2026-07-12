@@ -4,8 +4,18 @@ import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown, Loader2 } from
 import { StarField, Sparkle, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.png";
 import { NatalChart } from "@/components/NatalChart";
-import { useLeitura, type Signs } from "@/hooks/use-leitura";
+import { useLeitura, type ChartData } from "@/hooks/use-leitura";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  PLANET_SYMBOLS,
+  SIGN_SYMBOLS,
+  ROMAN,
+  computeAspects,
+  formatDeg,
+  houseOf,
+  normalizeSign,
+} from "@/lib/astro";
 
 export const Route = createFileRoute("/app/mapa")({
   component: MapaPage,
@@ -24,27 +34,16 @@ function parseTime(t: string): string {
   return t.replace(/\s+/g, "");
 }
 
-function extractSigns(data: unknown): Signs {
-  const d = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
-  if (!d || typeof d !== "object") return {};
-  const nested = (d.signos ?? d.signs ?? {}) as Record<string, unknown>;
-  const pick = (...keys: string[]) => {
-    for (const k of keys) {
-      const v = (d as Record<string, unknown>)[k] ?? nested[k];
-      if (typeof v === "string" && v.trim()) return v.trim();
-    }
-    return undefined;
-  };
-  return {
-    sol: pick("sol", "sun", "signo_solar", "sol_signo"),
-    lua: pick("lua", "moon", "signo_lunar", "lua_signo"),
-    asc: pick("asc", "ascendente", "ascendant", "rising", "signo_ascendente"),
-  };
-}
+type WebhookResponse = {
+  leitura?: string;
+  posicoes?: ChartData["posicoes"];
+  ascendente?: ChartData["ascendente"];
+  casas_whole_sign?: ChartData["casas_whole_sign"];
+};
 
 function MapaPage() {
   const { user } = useAuth();
-  const { setLeitura, profile, setProfile, setSigns, generated, setGenerated } = useLeitura();
+  const { setLeitura, profile, setProfile, setSigns, setChart, generated, setGenerated } = useLeitura();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(
@@ -73,12 +72,52 @@ function MapaPage() {
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json().catch(() => ({}));
-      const leitura = Array.isArray(data) ? data[0]?.leitura : data?.leitura;
-      if (leitura) setLeitura(leitura);
-      setSigns(extractSigns(data));
+      const raw = await res.json().catch(() => ({}));
+      const data: WebhookResponse = Array.isArray(raw) ? raw[0] ?? {} : raw ?? {};
+
+      if (data.leitura) setLeitura(data.leitura);
+
+      let chart: ChartData | null = null;
+      if (data.posicoes && data.ascendente && data.casas_whole_sign) {
+        chart = {
+          posicoes: data.posicoes,
+          ascendente: data.ascendente,
+          casas_whole_sign: data.casas_whole_sign,
+        };
+        setChart(chart);
+        setSigns({
+          sol: normalizeSign(data.posicoes["Sol"]?.signo ?? ""),
+          lua: normalizeSign(data.posicoes["Lua"]?.signo ?? ""),
+          asc: normalizeSign(data.ascendente.signo ?? ""),
+        });
+      }
+
       setProfile(form);
       setGenerated(true);
+
+      // Persist to Supabase (best-effort — requires birth_charts table)
+      if (user && chart) {
+        supabase
+          .from("birth_charts")
+          .insert({
+            user_id: user.id,
+            name: form.name,
+            birth_date: parseDate(form.date),
+            birth_time: parseTime(form.time),
+            city: form.city,
+            country: form.country,
+            sun_sign: normalizeSign(chart.posicoes["Sol"]?.signo ?? ""),
+            moon_sign: normalizeSign(chart.posicoes["Lua"]?.signo ?? ""),
+            asc_sign: normalizeSign(chart.ascendente.signo ?? ""),
+            posicoes: chart.posicoes,
+            ascendente: chart.ascendente,
+            casas_whole_sign: chart.casas_whole_sign,
+            leitura: data.leitura ?? null,
+          })
+          .then(({ error }) => {
+            if (error) console.warn("[birth_charts] insert failed:", error.message);
+          });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao gerar mapa");
     } finally {
@@ -89,6 +128,7 @@ function MapaPage() {
   if (generated) {
     return <ChartView name={form.name} onBack={() => setGenerated(false)} />;
   }
+
 
   return (
     <div className="relative min-h-full overflow-hidden">
