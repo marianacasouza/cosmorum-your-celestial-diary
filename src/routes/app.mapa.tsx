@@ -8,7 +8,6 @@ import { useLeitura, type ChartData } from "@/hooks/use-leitura";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  PLANET_SYMBOLS,
   SIGN_SYMBOLS,
   ROMAN,
   computeAspects,
