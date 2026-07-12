@@ -255,33 +255,43 @@ function InputCard({
 }
 
 function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
+  const { chart } = useLeitura();
   const [tab, setTab] = useState<"posicoes" | "aspectos" | "casas">("aspectos");
 
-  const aspects = [
-    { a: "☉", n: "Sol", rel: "trígono", b: "Lua", bs: "☽", orb: "3°12'", sym: "△", color: "text-blue-700" },
-    { a: "☽", n: "Lua", rel: "oposição", b: "Marte", bs: "♂", orb: "5°47'", sym: "☍", color: "text-red-700" },
-    { a: "☿", n: "Mercúrio", rel: "trígono", b: "Júpiter", bs: "♃", orb: "2°21'", sym: "△", color: "text-blue-700" },
-    { a: "♀", n: "Vênus", rel: "quadratura", b: "Saturno", bs: "♄", orb: "4°01'", sym: "□", color: "text-red-700" },
-    { a: "♂", n: "Marte", rel: "sextil", b: "Urano", bs: "♅", orb: "1°39'", sym: "✶", color: "text-blue-700" },
-  ];
+  const ascSign = chart ? normalizeSign(chart.ascendente.signo) : "";
 
-  const positions = [
-    { p: "Sol", s: "Touro", deg: "26°14'", h: "Casa X" },
-    { p: "Lua", s: "Escorpião", deg: "08°02'", h: "Casa IV" },
-    { p: "Ascendente", s: "Leão", deg: "12°47'", h: "—" },
-    { p: "Mercúrio", s: "Gêmeos", deg: "03°55'", h: "Casa XI" },
-    { p: "Vênus", s: "Câncer", deg: "19°28'", h: "Casa XII" },
-    { p: "Marte", s: "Touro", deg: "14°06'", h: "Casa X" },
-    { p: "Júpiter", s: "Libra", deg: "22°41'", h: "Casa III" },
-    { p: "Saturno", s: "Aquário", deg: "27°33'", h: "Casa VII" },
-    { p: "Quíron", s: "Leão", deg: "05°18'", h: "Casa I" },
-  ];
+  const aspects = chart
+    ? computeAspects(chart).slice(0, 8).map((a) => ({
+        n: a.a, b: a.b, aSym: a.aSym, bSym: a.bSym,
+        rel: a.label, orb: a.orb, sym: a.sym, color: a.color,
+      }))
+    : [];
 
-  const houses = Array.from({ length: 12 }, (_, i) => ({
-    n: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][i],
-    s: ["Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes", "Áries", "Touro", "Gêmeos", "Câncer"][i],
-    deg: `${(i * 7 + 4) % 30}°${(i * 13) % 60 < 10 ? "0" : ""}${(i * 13) % 60}'`,
-  }));
+  const positions = chart
+    ? [
+        ...Object.entries(chart.posicoes).map(([planet, p]) => ({
+          p: planet,
+          s: normalizeSign(p.signo),
+          deg: formatDeg(p.grau),
+          h: `Casa ${ROMAN[houseOf(p.signo, ascSign) - 1] ?? "—"}`,
+        })),
+        {
+          p: "Ascendente",
+          s: ascSign,
+          deg: formatDeg(chart.ascendente.grau),
+          h: "—",
+        },
+      ]
+    : [];
+
+  const houses = chart
+    ? chart.casas_whole_sign.map((h) => ({
+        n: ROMAN[h.casa - 1] ?? String(h.casa),
+        s: normalizeSign(h.signo),
+        sym: SIGN_SYMBOLS[normalizeSign(h.signo)] ?? "",
+      }))
+    : [];
+
 
   return (
     <div className="relative min-h-full overflow-hidden">
