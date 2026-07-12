@@ -4,12 +4,39 @@ import { StarField, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.jpg";
 import moonFace from "@/assets/moon-face.jpg";
 import statue from "@/assets/statue-reading.jpg";
+import { useLeitura } from "@/hooks/use-leitura";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/app/eu")({
   component: EuPage,
 });
 
+const MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+function formatDate(d?: string): string | null {
+  if (!d) return null;
+  const parts = d.split(/[\s/\-]+/).filter(Boolean);
+  if (parts.length !== 3) return d;
+  const [dd, mm] = parts;
+  const m = MONTHS[parseInt(mm, 10) - 1];
+  if (!m) return d;
+  return `${parseInt(dd, 10)} de ${m}`;
+}
+
 function EuPage() {
+  const { user } = useAuth();
+  const { profile, signs } = useLeitura();
+
+  const displayName =
+    profile?.name?.trim() ||
+    ((user?.user_metadata as { full_name?: string } | undefined)?.full_name) ||
+    user?.email?.split("@")[0] ||
+    "Viajante";
+  const firstName = displayName.split(" ")[0];
+  const dateLabel = formatDate(profile?.date);
+  const cityLabel = profile?.city?.trim() || null;
+  const subtitle = [dateLabel, cityLabel].filter(Boolean).join(" · ");
+
   return (
     <div className="relative min-h-full overflow-hidden">
       <StarField />
@@ -31,17 +58,17 @@ function EuPage() {
             className="h-full w-full rounded-full object-cover shadow-mystic gold-border"
           />
         </div>
-        <h2 className="mt-3 font-display text-2xl text-primary">Mariana</h2>
-        <p className="font-serif italic text-[12px] text-muted-foreground">
-          17 de maio · São Paulo
-        </p>
+        <h2 className="mt-3 font-display text-2xl text-primary">{firstName}</h2>
+        {subtitle && (
+          <p className="font-serif italic text-[12px] text-muted-foreground">{subtitle}</p>
+        )}
       </div>
 
       {/* Trinity cards */}
       <div className="relative mx-5 mt-5 grid grid-cols-3 gap-2">
-        <TrinityCard sym="☉" img={sunFace} label="SOL" sign="Touro" />
-        <TrinityCard sym="☽" img={moonFace} label="LUA" sign="Escorpião" />
-        <TrinityCard sym="↑" img={null} label="ASC" sign="Leão" />
+        <TrinityCard sym="☉" img={sunFace} label="SOL" sign={signs?.sol ?? "—"} />
+        <TrinityCard sym="☽" img={moonFace} label="LUA" sign={signs?.lua ?? "—"} />
+        <TrinityCard sym="↑" img={null} label="ASC" sign={signs?.asc ?? "—"} />
       </div>
 
       {/* Premium */}

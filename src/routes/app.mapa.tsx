@@ -1,17 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Bell, User, Calendar, Clock, MapPin, Globe, ChevronDown, Loader2 } from "lucide-react";
 import { StarField, Sparkle, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.png";
 import { NatalChart } from "@/components/NatalChart";
-import { useLeitura } from "@/hooks/use-leitura";
+import { useLeitura, type Signs } from "@/hooks/use-leitura";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/app/mapa")({
   component: MapaPage,
 });
 
 function parseDate(d: string): string {
-  // "17 / 05 / 1993" -> "1993-05-17"
   const parts = d.split(/[\s/\-]+/).filter(Boolean);
   if (parts.length === 3) {
     const [dd, mm, yyyy] = parts;
@@ -21,23 +21,41 @@ function parseDate(d: string): string {
 }
 
 function parseTime(t: string): string {
-  // "14 : 30" -> "14:30"
   return t.replace(/\s+/g, "");
 }
 
+function extractSigns(data: unknown): Signs {
+  const d = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
+  if (!d || typeof d !== "object") return {};
+  const nested = (d.signos ?? d.signs ?? {}) as Record<string, unknown>;
+  const pick = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = (d as Record<string, unknown>)[k] ?? nested[k];
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+    return undefined;
+  };
+  return {
+    sol: pick("sol", "sun", "signo_solar", "sol_signo"),
+    lua: pick("lua", "moon", "signo_lunar", "lua_signo"),
+    asc: pick("asc", "ascendente", "ascendant", "rising", "signo_ascendente"),
+  };
+}
+
 function MapaPage() {
-  const navigate = useNavigate();
-  const { setLeitura } = useLeitura();
-  const [generated, setGenerated] = useState(false);
+  const { user } = useAuth();
+  const { setLeitura, profile, setProfile, setSigns, generated, setGenerated } = useLeitura();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "Mariana Silva",
-    date: "17 / 05 / 1993",
-    time: "14 : 30",
-    city: "São Paulo, SP",
-    country: "Brasil",
-  });
+  const [form, setForm] = useState(
+    profile ?? {
+      name: ((user?.user_metadata as { full_name?: string } | undefined)?.full_name) ?? user?.email?.split("@")[0] ?? "",
+      date: "",
+      time: "",
+      city: "",
+      country: "Brasil",
+    },
+  );
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -58,16 +76,15 @@ function MapaPage() {
       const data = await res.json().catch(() => ({}));
       const leitura = Array.isArray(data) ? data[0]?.leitura : data?.leitura;
       if (leitura) setLeitura(leitura);
+      setSigns(extractSigns(data));
+      setProfile(form);
       setGenerated(true);
-      navigate({ to: "/app/leitura" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao gerar mapa");
     } finally {
       setLoading(false);
     }
   };
-
-
 
   if (generated) {
     return <ChartView name={form.name} onBack={() => setGenerated(false)} />;
