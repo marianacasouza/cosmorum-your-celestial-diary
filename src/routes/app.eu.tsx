@@ -4,10 +4,24 @@ import { StarField, Ornament } from "@/components/Celestial";
 import sunFace from "@/assets/sun-face.jpg";
 import moonFace from "@/assets/moon-face.jpg";
 import statue from "@/assets/statue-reading.jpg";
+import { useLeitura } from "@/hooks/use-leitura";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/app/eu")({
   component: EuPage,
 });
+
+const MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+function formatDate(d?: string): string | null {
+  if (!d) return null;
+  const parts = d.split(/[\s/\-]+/).filter(Boolean);
+  if (parts.length !== 3) return d;
+  const [dd, mm] = parts;
+  const m = MONTHS[parseInt(mm, 10) - 1];
+  if (!m) return d;
+  return `${parseInt(dd, 10)} de ${m}`;
+}
 
 function EuPage() {
   return (
