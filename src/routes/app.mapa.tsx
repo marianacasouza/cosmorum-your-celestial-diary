@@ -333,10 +333,10 @@ function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
             <ul className="divide-y divide-border/60">
               {aspects.map((a) => (
                 <li key={a.n + a.b} className="flex items-center gap-3 py-2 text-[13px]">
-                  <span className="font-display text-lg text-primary">{a.a}</span>
+                  <span className="font-display text-lg text-primary">{a.aSym}</span>
                   <span className="flex-1 truncate">
                     {a.n} <em className="italic text-muted-foreground">{a.rel}</em> {a.b}{" "}
-                    <span className="font-display text-primary">{a.bs}</span>
+                    <span className="font-display text-primary">{a.bSym}</span>
                   </span>
                   <span className="text-[11px] text-muted-foreground">orb {a.orb}</span>
                   <span className={`font-display text-lg ${a.color}`}>{a.sym}</span>
