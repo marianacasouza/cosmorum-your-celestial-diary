@@ -44,9 +44,11 @@ export function NatalChart({ chart }: { chart?: ChartData | null }) {
   const rPlanets = 152;
 
   // deg is "angle from ASC", counter-clockwise. 0 => left (9 o'clock).
+  // ASC at left (9h), zodiac progresses counter-clockwise through IC (bottom),
+  // DSC (right), MC (top). Screen Y grows downward, so add r*sin(rad).
   const polar = (deg: number, r: number) => {
     const rad = ((180 - deg) * Math.PI) / 180;
-    return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   };
 
   const ascLon = chart ? ascLongitude(chart) : 0;
