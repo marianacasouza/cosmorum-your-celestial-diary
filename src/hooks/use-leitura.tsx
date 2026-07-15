@@ -22,7 +22,7 @@ export type PlanetPosition = {
 
 export type ChartData = {
   posicoes: Record<string, PlanetPosition>;
-  ascendente: { signo: string; grau: string };
+  ascendente: { signo: string; grau: string; grau_total?: string | number; longitude?: string | number };
   casas_whole_sign: Array<{ casa: number; signo: string }>;
 };
 
