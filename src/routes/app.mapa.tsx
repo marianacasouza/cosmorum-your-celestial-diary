@@ -306,7 +306,7 @@ function ChartView({ name, onBack }: { name: string; onBack: () => void }) {
       <p className="relative mt-1 text-center text-[10px] tracking-[0.3em] text-accent">{name.toUpperCase()}</p>
 
       <div className="relative mx-4 mt-3">
-        <NatalChart />
+        <NatalChart chart={chart} />
       </div>
 
       <div className="relative mx-5 mt-3 grid grid-cols-3 gap-2">
